@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creating Interactive Modules with Genially</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        
+        #sidebar {
+            width: 100%;
+            transform: translateX(-100%);
+        }
+        
+        #sidebar.open {
+            transform: translateX(0);
+        }
+
+        @media (min-width: 1024px) {
+            #sidebar {
+                width: 25%;
+                transform: translateX(0);
+            }
+            #sidebar.closed {
+                transform: translateX(-100%);
+            }
+            #main-content {
+                margin-left: 25%;
+            }
+            #main-content.sidebar-closed {
+                margin-left: 0;
+            }
+        }
+
+        .prose {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .prose p {
+            margin-bottom: 1rem;
+        }
+
+        .prose strong {
+            font-weight: 700;
+        }
+
+        .collapsible-item .collapsible-content {
+            max-height: 0;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .collapsible-item.open .collapsible-content {
+            max-height: 500px; /* Adjust as needed for content length */
+            transition: max-height 0.3s ease-in;
+        }
+        .collapsible-item.open .collapsible-btn .chevron-icon {
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body class="bg-blue-50">
+    <!-- Main container -->
+    <div class="flex flex-col lg:flex-row min-h-screen bg-blue-50 transition-all duration-300">
+
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar" class="fixed top-0 left-0 h-full bg-white shadow-xl flex-shrink-0 transition-all duration-300 transform -translate-x-full w-full lg:w-1/4 overflow-y-auto z-40 p-6 lg:p-8">
+            <div class="flex justify-between items-center mb-6 border-b-2 pb-4">
+                <h2 class="text-2xl font-bold text-indigo-700">Module Units</h2>
+                <!-- Close button for mobile -->
+                <button id="close-sidebar-btn" class="text-gray-500 lg:hidden p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <ul class="space-y-4" id="nav-list">
+                <!-- Navigation items will be injected here -->
+            </ul>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main id="main-content" class="flex-grow p-6 lg:p-8 transition-all duration-300 lg:ml-[25%]">
+            <div class="container mx-auto">
+                <header class="flex items-center justify-between mb-6">
+                    <h1 class="text-5xl font-extrabold text-gray-900 border-b-4 pb-4 flex-grow">Creating Interactive Modules with Genially</h1>
+                    <button id="toggle-sidebar-btn" class="p-3 bg-white text-indigo-700 rounded-full shadow-lg ml-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+                    </button>
+                </header>
+
+                <p class="text-xl text-gray-600 mb-8">This module provides a comprehensive guide to designing and developing engaging interactive content for pupils using Genially, grounded in educational theory and best practices. 🚀</p>
+
+                <div id="content-area">
+                    <!-- Unit content will be injected here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Helper function to create an element with classes
+            const createEl = (tag, classes = [], content = '') => {
+                const el = document.createElement(tag);
+                el.className = classes.join(' ');
+                if (content) {
+                    el.innerHTML = content;
+                }
+                return el;
+            };
+
+            // Icons as SVG strings
+            const icons = {
+                Menu: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/></svg>`,
+                Target: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
+                Book: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>`,
+                Palette: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 17.5A2.4 2.4 0 0 1 14 20h-4a2.4 2.4 0 0 1-3.5-2.5 2.4 2.4 0 0 0-3.5-2.5V8a6 6 0 0 1 12 0v5a2.4 2.4 0 0 0-3.5 2.5Z"/><path d="M18 10a6 6 0 0 1-6 6v3a4 4 0 0 0 8 0V11a2 2 0 0 0-2-2"/></svg>`,
+                Settings: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.23 20.3a2 2 0 0 1-2.07 0c-3.7-1.47-5.59-4.22-5.7-7.6a8 8 0 0 1 12.3-6.57c.72.63 1.25 1.27 1.76 1.93a5 5 0 0 1 0 7.82c-1.37 1.74-3.37 2.91-5.73 3.42ZM21 16c0-1.85-.8-3.56-2.04-4.81C17.65 10.8 16 10 14 10a5 5 0 0 0-2.09.43L6 14l11 11 4-4a5 5 0 0 0 0-7c.2-.2.4-.4.6-.6A8 8 0 0 0 21 16Z"/></svg>`,
+                CheckSquare: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="M9 12l2 2 4-4"/></svg>`,
+                ChevronRight: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>`,
+                Rocket: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 2.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z"/><path d="M12.5 2.5c2.34 2.34 4.5 4.5 4.5 9.5 0 5-4.5 9-9.5 9-5 0-9.5-4-9.5-9s4.5-9.5 9-9.5c5 0 7.16 2.16 9.5 4.5z"/><path d="M12.5 7.5c2.34-2.34 4.5-4.5 4.5-9.5 0-5-4.5-9-9.5-9-5 0-9.5 4-9.5 9s4.5 9.5 9 9.5c5 0 7.16-2.16 9.5-4.5z"/></svg>`,
+                Lightbulb: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 0-5 5c0 1.25.5 2.5 1.5 3.5s2.5 1.5 3.5 1.5c1 0 2-.5 3-1.5s1.5-2.5 1.5-3.5a5 5 0 0 0-5-5z"/><path d="M12 18h0.01"/></svg>`,
+                Eye: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`,
+                Link: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+                Type: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 18h4a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z"/></svg>`,
+            };
+
+            const navItems = [
+                { title: 'The Power of Interactivity', icon: 'Target', id: 'Unit-1' },
+                { title: 'Exploring Genially', icon: 'Book', id: 'Unit-2' },
+                { title: 'Building Interactive Content', icon: 'Palette', id: 'Unit-3' },
+                { title: 'Designing Meaningful Modules', icon: 'Settings', id: 'Unit-4' },
+                { title: 'Publishing and Evaluating', icon: 'CheckSquare', id: 'Unit-5' },
+                { title: 'Final Module Checklist', icon: 'CheckSquare', id: 'Unit-6' },
+            ];
+
+            const navList = document.getElementById('nav-list');
+            const mainContent = document.getElementById('content-area');
+            const sidebar = document.getElementById('sidebar');
+            const mainContentWrapper = document.getElementById('main-content');
+            const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
+            const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+            let currentPage = 'Unit-1';
+
+            // Generate navigation items
+            navItems.forEach(item => {
+                const li = createEl('li');
+                const button = createEl('button', ['flex', 'items-center', 'text-left', 'w-full', 'p-4', 'rounded-xl', 'transition-all', 'duration-200', 'text-gray-600', 'hover:bg-gray-100'], `<span class="w-5 h-5 mr-3">${icons[item.icon]}</span><span class="text-lg">${item.title}</span>`);
+                button.dataset.page = item.id;
+                li.appendChild(button);
+                navList.appendChild(li);
+            });
+
+            // Set up event listeners for navigation
+            navList.addEventListener('click', (e) => {
+                const button = e.target.closest('button');
+                if (button && button.dataset.page) {
+                    navigateTo(button.dataset.page);
+                }
+            });
+
+            // Menu toggle
+            const toggleSidebar = () => {
+                sidebar.classList.toggle('open');
+                mainContentWrapper.classList.toggle('sidebar-closed');
+            };
+
+            toggleSidebarBtn.addEventListener('click', toggleSidebar);
+            closeSidebarBtn.addEventListener('click', toggleSidebar);
+
+            // Initial state for large screens
+            if (window.innerWidth >= 1024) {
+                sidebar.classList.add('open');
+            }
+
+            const units = {
+                'Unit-1': `
+                    <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                            <span class="w-8 h-8 mr-3 text-indigo-500">${icons.Rocket}</span>
+                            1.1 Why Create Interactive Modules?
+                        </h2>
+                        <p class="text-gray-700">The landscape of learning has dramatically shifted. Today's children, often referred to as "digital natives," are growing up in an environment saturated with digital information and interactive media. Traditional, passive learning models often fail to capture their attention or foster the deeper cognitive processing required for meaningful learning. Interactive modules are designed to bridge this gap, offering several key advantages:</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                            <li><strong>The Digital Native Generation:</strong> Interactive modules meet students where they are, leveraging their innate digital fluency for educational purposes. By using tools and formats they are familiar with, we can reduce the learning curve and increase engagement from the outset.</li>
+                            <li><strong>Attention Spans and Engagement:</strong> With a constant stream of information, maintaining a child's attention is a challenge. Interactive modules combat this by providing varied stimuli, opportunities for active participation, and immediate feedback, which all serve to keep the learner focused and engaged.</li>
+                        </ul>
+                        <div class="mt-6 flex flex-wrap justify-center items-center gap-4">
+                            <img src="https://placehold.co/400x200/5C6BC0/FFFFFF?text=Infographic:%20Passive%20vs%20Active%20Learning" alt="An infographic comparing passive and active learning methods." class="rounded-xl shadow-md" />
+                            <img src="https://placehold.co/400x200/5C6BC0/FFFFFF?text=Infographic:%20The%20Digital%20Native%20Learner" alt="An infographic showing the characteristics of a digital native learner." class="rounded-xl shadow-md" />
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                            <span class="w-8 h-8 mr-3 text-yellow-500">${icons.Lightbulb}</span>
+                            1.2 Theories and Research Supporting Interactive Learning
+                        </h2>
+                        <p class="text-gray-700">The efficacy of interactive learning is deeply rooted in established educational theories and validated by extensive empirical research. Understanding these theories can help you design more effective and pedagogically sound modules.</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                            <li><strong>Constructivism (Piaget, Vygotsky):</strong> This theory posits that learners actively construct their own understanding and knowledge of the world through experience and reflection. Interactive modules provide the "experiences" and "modifications" necessary for this active construction, encouraging students to make connections and build on prior knowledge.</li>
+                            <li><strong>Cognitive Load Theory (Sweller):</strong> This theory suggests that our working memory has a limited capacity. Well-designed interactive modules can reduce extraneous cognitive load by presenting information clearly and logically, while focusing on a single task at a time.</li>
+                            <li><strong>Social Learning Theory (Bandura):</strong> This theory emphasizes the importance of observing and modeling the behaviors, attitudes, and emotional reactions of others. Interactive modules can incorporate opportunities for collaboration and peer sharing, allowing students to learn from each other in a guided environment.</li>
+                        </ul>
+                    </div>
+                `,
+                'Unit-2': `
+                    <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                            <span class="w-8 h-8 mr-3 text-blue-500">${icons.Book}</span>
+                            2.1 Overview of the Genially Platform
+                        </h2>
+                        <p class="text-gray-700">Genially is a versatile online content creation tool designed to bring static content to life. It’s a powerful platform for educators, allowing you to create presentations, infographics, gamified content, interactive images, and more—all without needing to write a single line of code. Its strength lies in its intuitive drag-and-drop interface and a rich library of pre-designed templates and interactive elements.</p>
+                        <div class="mt-6 flex flex-wrap justify-center items-center gap-4">
+                            <img src="https://placehold.co/400x200/5C6BC0/FFFFFF?text=Infographic:%20Genially%20Platform%20Features" alt="An infographic detailing the features of the Genially platform." class="rounded-xl shadow-md" />
+                        </div>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                            <li><strong>What is Genially:</strong> It's a cloud-based tool that makes it easy to add layers of interactivity to any visual asset. This can range from simple hover effects to complex branching scenarios.</li>
+                            <li><strong>The Dashboard:</strong> Your control center for managing all your creations. From here, you can start a new project from scratch, use a template, organize existing "geniallys," and share your work.</li>
+                            <li><strong>Templates:</strong> Genially provides thousands of professionally designed templates tailored for specific educational purposes, saving you significant time and effort.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                            <span class="w-8 h-8 mr-3 text-purple-500">${icons.Palette}</span>
+                            2.2 The Genially Editor Interface
+                        </h2>
+                        <p class="text-gray-700">The Genially editor is a user-friendly environment where all the magic happens. Navigating its key panels is essential for efficient creation:</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                            <li><strong>Elements Panel:</strong> This is your primary toolbox on the left side. It contains all the building blocks for your module, including text, images, resources, and interactive buttons.</li>
+                            <li><strong>Pages Panel:</strong> Manages the different "slides" or pages of your project. You can add, delete, duplicate, and reorder pages here to control the flow of your module.</li>
+                            <li><strong>Layers Panel:</strong> Critical for managing complex designs. It allows you to see and control the stacking order of elements. You can move objects to the front or back, lock them in place, or hide them temporarily.</li>
+                            <li><strong>Interactive Actions:</strong> This is the heart of Genially. For almost any element, you can assign an "action" that triggers when the user clicks or hovers over it.</li>
+                        </ul>
+                        <div class="mt-6 flex flex-wrap justify-center items-center gap-4">
+                            <img src="https://placehold.co/400x200/5C6BC0/FFFFFF?text=Infographic:%20Genially%20Editor%20Layout" alt="An infographic showing the layout of the Genially editor." class="rounded-xl shadow-md" />
+                        </div>
+                    </div>
+                `,
+                'Unit-3': `
+                    <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                            <span class="w-8 h-8 mr-3 text-pink-500">${icons.Type}</span>
+                            3.1 Working with Text and Typography
+                        </h2>
+                        <p class="text-gray-700">The way you present text can make or break your module. Effective typography is about more than just choosing a font; it's about clarity and legibility. For young learners, simple, sans-serif fonts are generally the best choice as they are easy to read. Be mindful of font sizes and ensure there is sufficient contrast between your text and the background color to prevent eye strain. 🎨</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                            <li><strong>Font Choices:</strong> Stick to simple, legible fonts like Arial, Helvetica, or Genially’s built-in options. Avoid overly decorative or scripted fonts that can be difficult for children to read.</li>
+                            <li><strong>Hierarchy:</strong> Use different font sizes, weights (bold), and colors to create a clear visual hierarchy. Headings should be prominent, while body text should be comfortable to read.</li>
+                        </ul>
+                        <div class="mt-6 flex flex-wrap justify-center items-center gap-4">
+                            <img src="https://placehold.co/400x200/5C6BC0/FFFFFF?text=Infographic:%20Typography%20Best%20Practices" alt="An infographic demonstrating typography best practices for children." class="rounded-xl shadow-md" />
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                            <span class="w-8 h-8 mr-3 text-red-500">${icons.Eye}</span>
+                            3.2 Integrating Visuals and Multimedia
+                        </h2>
+                        <p class="text-gray-700">Visuals and multimedia are crucial for engaging today's learners and catering to diverse learning styles. Genially makes it easy to incorporate a variety of media types. 🖼️🎥</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                            <li><strong>Images and Illustrations:</strong> Use high-quality images from Genially's integrated libraries or upload your own. Illustrations, icons, and infographics can simplify complex ideas and make the content more visually appealing.</li>
+                            <li><strong>Multimedia:</strong> You can easily embed videos from platforms like YouTube or Vimeo by simply pasting the URL. Adding audio elements, such as a short narration or sound effects, can be a great way to enhance the learning experience, especially for younger pupils.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                            <span class="w-8 h-8 mr-3 text-teal-500">${icons.Link}</span>
+                            3.3 Core Interactive Elements
+                        </h2>
+                        <p class="text-gray-700">Genially's core strength is its interactive features. Every interactive element can be assigned an "action" that triggers when a user clicks or hovers over it. These actions are the building blocks of an engaging module: 👇</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                            <li><strong>Tooltip:</strong> A small pop-up that appears on hover, ideal for providing quick, concise information without cluttering the screen.</li>
+                            <li><strong>Window:</strong> A larger pop-up that appears on click. This is perfect for detailed content, such as a full text explanation, a video, or an image gallery.</li>
+                            <li><strong>Go to Page:</strong> This action allows you to create a non-linear learning path, directing the user to a different page in your Genially module.</li>
+                            <li><strong>Link:</strong> Embed an external link that opens in a new tab, taking the user to a relevant website or resource.</li>
+                        </ul>
+                        <div class="mt-6 flex flex-wrap justify-center items-center gap-4">
+                            <img src="https://placehold.co/400x200/5C6BC0/FFFFFF?text=Infographic:%20Interactive%20Actions" alt="An infographic showing how different interactive actions work." class="rounded-xl shadow-md" />
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                            <span class="w-8 h-8 mr-3 text-indigo-500">${icons.Rocket}</span>
+                            3.4 Animation and Advanced Interactivity
+                        </h2>
+                        <p class="text-gray-700">Animations add dynamism, while advanced interactivity creates more sophisticated and engaging experiences. ✨</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                            <li><strong>Animations:</strong> Use purposeful animations to highlight new information, guide the learner's eye, or provide a sense of progress.</li>
+                            <li><strong>Drag-and-Drop:</strong> A powerful premium feature for creating sorting activities, matching games, and classification exercises.</li>
+                            <li><strong>Question Blocks:</strong> Genially provides pre-built question and answer blocks that can be customized for self-assessment.</li>
+                        </ul>
+                    </div>
+                `,
+                'Unit-4': `
+                    <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                            <span class="w-8 h-8 mr-3 text-orange-500">${icons.Settings}</span>
+                            4.1 Types of Interactive Content for Children
+                        </h2>
+                        <p class="text-gray-700">Interactive content can take many forms, each suited for a different pedagogical purpose. 🧠</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                            <li><strong>Interactive Storybooks:</strong> By adding interactive elements like pop-up facts or mini-games within a narrative, you can create immersive and engaging stories that help with reading comprehension and vocabulary.</li>
+                            <li><strong>Gamified Quizzes and Escapes:</strong> Turn a traditional quiz into a fun game with a scoring system or badges. "Escape Room" style modules require students to solve a series of puzzles.</li>
+                            <li><strong>Virtual Field Trips:</strong> Create an interactive journey through a museum, a historical site, or even a virtual tour of the human body.</li>
+                            <li><strong>Interactive Infographics and Timelines:</strong> Use an infographic to present data in an engaging way, with interactive elements that reveal more information.</li>
+                        </ul>
+                        <div class="mt-6 flex flex-wrap justify-center items-center gap-4">
+                            <img src="https://placehold.co/400x200/5C6BC0/FFFFFF?text=Infographic:%20Content%20Types" alt="An infographic showing different types of interactive content." class="rounded-xl shadow-md" />
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                            <span class="w-8 h-8 mr-3 text-purple-500">${icons.Palette}</span>
+                            4.2 Child-Friendly Design Principles
+                        </h2>
+                        <p class="text-gray-700">Effective design for children requires specific considerations to ensure the content is not only engaging but also accessible and easy to use. 👩‍🏫</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                            <li><strong>Simplicity and Clarity:</strong> Avoid clutter and visual noise. Use a clean layout with ample white space. Use clear, age-appropriate language and simple instructions.</li>
+                            <li><strong>Visual Appeal:</strong> Children are drawn to bright, vibrant colors and engaging illustrations. Use a consistent color palette and a style of illustration that aligns with the module's topic.</li>
+                            <li><strong>Intuitive Navigation:</strong> Make sure the interactive elements are clearly labeled and easy to find. Use universal icons for things like 'Next,' 'Back,' and 'Home.'</li>
+                            <li><strong>Positive Reinforcement:</strong> Use encouraging feedback, such as congratulatory messages or simple animations, to motivate learners and build their confidence.</li>
+                        </ul>
+                        <div class="mt-6 flex flex-wrap justify-center items-center gap-4">
+                            <img src="https://placehold.co/400x200/5C6BC0/FFFFFF?text=Infographic:%20Design%20for%20Kids" alt="An infographic showing child-friendly design principles." class="rounded-xl shadow-md" />
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                            <span class="w-8 h-8 mr-3 text-pink-500">${icons.Target}</span>
+                            4.3 Structuring a Learning Pathway
+                        </h2>
+                        <p class="text-gray-700">A well-structured module guides the learner logically through the content, from introduction to conclusion. A solid pathway ensures that students build their knowledge progressively. 🗺️</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                            <li><strong>Introduction:</strong> Begin with a short, engaging hook that introduces the topic and outlines the learning objectives. This primes the learner for what's to come.</li>
+                            <li><strong>Content Chunks:</strong> Break down complex information into smaller, digestible chunks. Use a new page or a pop-up window for each concept to prevent cognitive overload.</li>
+                            <li><strong>Practice and Application:</strong> Integrate interactive activities, such as quizzes or drag-and-drop exercises, immediately after a content chunk.</li>
+                            <li><strong>Summary and Review:</strong> Conclude the module with a summary of key takeaways and a final activity or challenge.</li>
+                        </ul>
+                    </div>
+                `,
+                'Unit-5': `
+                    <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                            <span class="w-8 h-8 mr-3 text-blue-500">${icons.Eye}</span>
+                            5.1 Previewing and Testing Your Genially
+                        </h2>
+                        <p class="text-gray-700">Rigorous testing is paramount before publishing. Genially provides a "Preview" button in the editor that allows you to see your work as a user would. During this phase, make sure to: 🐞</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                            <li><strong>Functionality Check:</strong> Click on every interactive element to ensure it behaves as expected.</li>
+                            <li><strong>Responsiveness Test:</strong> Check your module on different devices (desktop, tablet, mobile) to ensure the layout remains functional and visually appealing.</li>
+                            <li><strong>User Walkthrough:</strong> Ask a colleague or a student to navigate the module from start to finish. Their feedback is invaluable for catching usability issues you might have missed.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                            <span class="w-8 h-8 mr-3 text-teal-500">${icons.Link}</span>
+                            5.2 Publishing and Sharing Your Module
+                        </h2>
+                        <p class="text-gray-700">Once your module is ready, Genially offers flexible options for sharing your creations. From the editor, you can click the "All set" button to begin the publishing process. 🌐</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                            <li><strong>Public vs. Private:</strong> You can choose to make your Genially public, where it will be visible on your profile and discoverable via search engines, or private, which is only accessible to those with the link (a premium feature).</li>
+                            <li><strong>Sharing via Link:</strong> The simplest method for distribution. You can copy a link and share it directly with students via email, a learning management system (LMS), or a classroom website.</li>
+                            <li><strong>Embedding:</strong> Genially provides an embed code that allows you to integrate your module directly into a website or blog, making it a seamless part of your existing content.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                            <span class="w-8 h-8 mr-3 text-green-500">${icons.CheckSquare}</span>
+                            5.3 Gathering Feedback and Iteration
+                        </h2>
+                        <p class="text-gray-700">The process of creating effective educational modules is iterative. Your first version is a prototype, and feedback from pupils and peers is invaluable for continuous improvement. After publishing your Genially module, consider a feedback plan that includes: 📝</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                            <li><strong>Direct Observation:</strong> Watch a student as they interact with your module. Where do they get stuck? Where do they seem most engaged?</li>
+                            <li><strong>Quick Surveys:</strong> Use a simple, short survey at the end of the module to ask about clarity, difficulty, and enjoyment.</li>
+                            <li><strong>Peer Review:</strong> Ask a colleague to review your module, focusing on pedagogical design and technical functionality.</li>
+                        </ul>
+                        <p class="mt-4 text-gray-700">Based on this feedback, you can iterate and improve your module for a more effective learning experience. It is a cycle of design, implement, evaluate, and refine.</p>
+                    </div>
+                `,
+                'Unit-6': `
+                    <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                            <span class="w-8 h-8 mr-3 text-green-500">${icons.CheckSquare}</span>
+                            Final Module Checklist
+                        </h2>
+                        <p class="text-gray-700">Use this comprehensive checklist to evaluate your module before publishing. Check each item as you confirm it to see a live-generated summary of your progress. ✅</p>
+                    </div>
+                    <div id="checklist-container"></div>
+                    <div class="bg-indigo-50 p-6 rounded-2xl shadow-lg mt-8">
+                        <h3 class="text-2xl font-bold text-indigo-800 mb-4">Module Summary</h3>
+                        <div id="summary-area" class="prose text-gray-700 leading-relaxed">
+                            <p class="text-gray-500 italic">Check some items to generate a summary of your module's strengths.</p>
+                        </div>
+                    </div>
+                `,
+            };
+
+            const checklistItems = [
+                { id: '1', category: 'Content & Learning Objectives', text: 'Are the learning objectives clear and measurable for the target age group?', justification: 'Clear objectives (e.g., SMART objectives: Specific, Measurable, Achievable, Relevant, Time-bound) provide direction for both the designer and the learner. They guide content selection and assessment, ensuring alignment. Measurable objectives allow for effective evaluation of learning outcomes.', reference: 'Mager, R. F. (1962). Preparing Instructional Objectives. Fearon Publishers. (Pioneering work on instructional objectives).', isChecked: false },
+                { id: '2', category: 'Content & Learning Objectives', text: 'Is the content accurate, relevant, and age-appropriate?', justification: 'Inaccurate or irrelevant content undermines trust and engagement. Age-appropriateness ensures cognitive load is managed and content aligns with developmental stages (Piaget\'s stages of cognitive development).', reference: 'Ormrod, J. E. (2016). Educational Psychology: Developing Learners (9th ed.). Pearson. (Covers developmental stages and learning).', isChecked: false },
+                { id: '3', category: 'Content & Learning Objectives', text: 'Is the content chunked into manageable, digestible segments?', justification: 'Directly relates to Cognitive Load Theory. Breaking down information reduces extraneous cognitive load, making it easier for learners to process and retain.', reference: 'Sweller, J. (2010). Cognitive Load Theory: Considerations for the Design of Instruction. In R. E. Mayer (Ed.), The Cambridge Handbook of Multimedia Learning (pp. 119-131). Cambridge University Press.', isChecked: false },
+                { id: '4', category: 'Content & Learning Objectives', text: 'Does the module provide clear instructions for each activity?', justification: 'Clear instructions minimize confusion, reduce frustration, and allow learners to focus on the learning task rather than figuring out the interface. This supports independent learning.', reference: 'Merrill, M. D. (2002). First principles of instruction. Educational Technology Research and Development, 50(3), 43-59. (Emphasizes clear task presentation).', isChecked: false },
+                { id: '5', category: 'Interactivity & Engagement', text: 'Are there at least 3-5 different types of interactive elements used (e.g., clickable hotspots, quizzes, embedded videos, drag-and-drop)?', justification: 'Variety maintains engagement and caters to different learning preferences (e.g., visual, auditory, kinesthetic). Diverse interactions prevent monotony and stimulate various cognitive processes.', reference: 'Mayer, R. E. (2014). Multimedia Learning (2nd ed.). Cambridge University Press. (Discusses benefits of various multimedia elements).', isChecked: false },
+                { id: '6', category: 'Interactivity & Engagement', text: 'Does the module actively engage pupils rather than being a passive viewing experience?', justification: 'Aligns with constructivism. Active engagement leads to deeper processing, better retention, and stronger knowledge construction compared to passive reception.', reference: 'Bransford, J. D., Brown, A. L., & Cocking, R. R. (Eds.). (2000). How People Learn: Brain, Mind, Experience, and School. National Academies Press. (Highlights active learning).', isChecked: false },
+                { id: '7', category: 'Interactivity & Engagement', text: 'Is feedback (correct/incorrect, hints, encouragement) provided immediately and constructively?', justification: 'Immediate feedback is critical for self-regulation and error correction (Behaviorism). Constructive feedback guides learning rather than simply stating right/wrong, reducing frustration and promoting deeper understanding. Positive reinforcement boosts motivation.', reference: 'Hattie, J., & Timperley, H. (2007). The Power of Feedback. Review of Educational Research, 77(1), 81-112.', isChecked: false },
+                { id: '8', category: 'Interactivity & Engagement', text: 'Are animations used purposefully to enhance engagement, not distract?', justification: 'Purposeful animation can guide attention and illustrate processes, but excessive or irrelevant animation increases extraneous cognitive load and distracts from core learning.', reference: 'Mayer, R. E., & Moreno, R. (2003). Nine ways to reduce cognitive load in multimedia learning. Educational Psychologist, 38(1), 43-52.', isChecked: false },
+                { id: '9', category: 'Interactivity & Engagement', text: 'Does the module include elements that cater to different learning styles (visual, auditory, kinesthetic)?', justification: 'While "learning styles" as strict categories are debated, providing multiple modalities (visuals, audio, interactive tasks) acknowledges learner diversity and provides more pathways for information processing.', reference: 'Pashler, H., McDaniel, M., Rohrer, D., & Bjork, R. (2008). Learning Styles: Concepts and Evidence. Psychological Science in the Public Interest, 9(3), 105-119. (Critique of strict learning styles, but acknowledges multi-modal benefits).', isChecked: false },
+                { id: '10', category: 'Design & User Experience (UX)', text: 'Is the visual design appealing and child-friendly (colors, illustrations, fonts)?', justification: 'Aesthetically pleasing design enhances engagement and motivation. Child-friendly visuals create a welcoming and familiar learning environment.', reference: 'Norman, D. A. (2004). Emotional Design: Why We Love (or Hate) Everyday Things. Basic Books. (Discusses the role of aesthetics in user experience).', isChecked: false },
+                { id: '11', category: 'Design & User Experience (UX)', text: 'Is the navigation intuitive and easy for pupils to understand?', justification: 'Intuitive navigation reduces cognitive load and frustration, allowing learners to focus on content. Clear pathways are essential for independent exploration.', reference: 'Nielsen, J. (1994). Usability Engineering. Morgan Kaufmann. (Foundational principles of usability, including navigation).', isChecked: false },
+                { id: '12', category: 'Design & User Experience (UX)', text: 'Is the text legible with appropriate font sizes and contrast?', justification: 'Crucial for readability and accessibility, especially for younger learners or those with visual impairments. Poor legibility increases cognitive effort and can lead to disengagement.', reference: 'ISO 9241-3 (Ergonomics of human-system interaction - Visual displays - Part 3: Requirements for visual display quality).', isChecked: false },
+                { id: '13', category: 'Design & User Experience (UX)', text: 'Is the overall layout uncluttered and easy on the eyes?', justification: 'Supports Cognitive Load Theory by minimizing extraneous distractions. A clean layout enhances clarity and guides the learner\'s attention.', reference: 'Mayer, R. E. (2014). Multimedia Learning (2nd ed.). Cambridge University Press. (Coherence principle).', isChecked: false },
+                { id: '14', category: 'Design & User Experience (UX)', text: 'Does the module work well on various devices (desktop, tablet, mobile)?', justification: 'Ensures equitable access to learning materials, as pupils may use different devices for online learning. Responsive design is a standard for modern digital content.', reference: 'Nielsen, J. (2012). Mobile Usability. New Riders. (Discusses challenges and best practices for mobile interfaces).', isChecked: false },
+                { id: '15', category: 'Meaningfulness & Impact', text: 'Does the module encourage critical thinking, problem-solving, or creativity?', justification: 'Moves learning beyond rote memorization. Higher-order thinking skills are essential for deeper understanding and real-world application.', reference: 'Bloom, B. S., et al. (1956). Taxonomy of Educational Objectives: The Classification of Educational Goals, Handbook I: Cognitive Domain. David McKay Co Inc. (Bloom\'s Taxonomy).', isChecked: false },
+                { id: '16', category: 'Meaningfulness & Impact', text: 'Does it connect to real-world scenarios or prior knowledge of the pupils?', justification: 'Making learning relevant and connecting it to existing schemas enhances comprehension and retention (Constructivism). Real-world applications increase motivation.', reference: 'Ausubel, D. P. (1968). Educational psychology: A cognitive view. Holt, Rinehart & Winston. (Concept of meaningful learning).', isChecked: false },
+                { id: '17', category: 'Meaningfulness & Impact', text: 'Does it provide opportunities for pupils to construct their own understanding?', justification: 'A core tenet of constructivism. Learners actively build knowledge when given opportunities to explore, experiment, and integrate new information into their existing mental models.', reference: 'Bruner, J. S. (1966). Toward a Theory of Instruction. Harvard University Press. (Advocated for discovery learning).', isChecked: false },
+                { id: '18', category: 'Meaningfulness & Impact', text: 'Will pupils feel a sense of accomplishment upon completing the module?', justification: 'Fosters intrinsic motivation and self-efficacy. Positive emotional experiences with learning promote future engagement.', reference: 'Deci, E. L., & Ryan, R. M. (1985). Intrinsic Motivation and Self-Determination in Human Behavior. Plenum. (Self-Determination Theory).', isChecked: false },
+                { id: '19', category: 'Accessibility (Basic)', text: 'Are images accompanied by descriptive text where necessary (alt text)?', justification: 'Crucial for visually impaired learners using screen readers. Ensures that all users can understand the content of images.', reference: 'Web Content Accessibility Guidelines (WCAG) 2.1 by W3C (Guideline 1.1: Text Alternatives).', isChecked: false },
+                { id: '20', category: 'Accessibility (Basic)', text: 'Is there sufficient color contrast for readability?', justification: 'Essential for all learners, especially those with color blindness or low vision. Poor contrast leads to eye strain and difficulty reading.', reference: 'Web Content Accessibility Guidelines (WCAG) 2.1 by W3C (Guideline 1.4.3: Contrast (Minimum)).', isChecked: false },
+                { id: '21', category: 'Accessibility (Basic)', text: 'Is audio clear and accompanied by visual cues if important for understanding?', justification: 'For learners with hearing impairments, or in environments where audio cannot be used, visual alternatives (e.g., captions for videos, text descriptions for audio instructions) ensure content is accessible.', reference: 'Web Content Accessibility Guidelines (WCAG) 2.1 by W3C (Guideline 1.2: Time-based Media).', isChecked: false },
+            ];
+
+            const getCategorizedItems = (items) => {
+                return items.reduce((acc, item) => {
+                    acc[item.category] = acc[item.category] || [];
+                    acc[item.category].push(item);
+                    return acc;
+                }, {});
+            };
+
+            const renderChecklist = () => {
+                const checklistContainer = document.getElementById('checklist-container');
+                if (!checklistContainer) return;
+                checklistContainer.innerHTML = ''; // Clear previous content
+
+                const categorizedItems = getCategorizedItems(checklistItems);
+
+                Object.keys(categorizedItems).forEach(category => {
+                    const categoryDiv = createEl('div', ['bg-white', 'p-6', 'rounded-2xl', 'shadow-lg', 'mb-8']);
+                    const title = createEl('h3', ['text-2xl', 'font-bold', 'text-gray-800', 'mb-4', 'border-b', 'pb-2'], category);
+                    const list = createEl('ul', ['list-none', 'space-y-4']);
+
+                    categorizedItems[category].forEach(item => {
+                        const li = createEl('li', ['collapsible-item']);
+                        const content = `
+                            <div class="flex items-start space-x-4">
+                                <input type="checkbox" data-id="${item.id}" class="form-checkbox h-5 w-5 text-indigo-600 rounded-md mt-1" ${item.isChecked ? 'checked' : ''}>
+                                <div class="flex-grow">
+                                    <label class="text-lg cursor-pointer flex-grow font-medium text-gray-800">
+                                        ${item.text}
+                                    </label>
+                                    <div class="collapsible-content my-2 border border-gray-200 rounded-xl overflow-hidden">
+                                        <button class="collapsible-btn w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+                                            <span class="font-medium text-indigo-600">Academic Justification</span>
+                                            <span class="w-5 h-5 transition-transform duration-200 chevron-icon">${icons.ChevronRight}</span>
+                                        </button>
+                                        <div class="content p-4 text-gray-700">
+                                            <p><strong>Justification:</strong> ${item.justification}</p>
+                                            <p class="mt-2 text-sm text-gray-500"><strong>Academic Support:</strong> ${item.reference}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        li.innerHTML = content;
+                        list.appendChild(li);
+                    });
+
+                    categoryDiv.appendChild(title);
+                    categoryDiv.appendChild(list);
+                    checklistContainer.appendChild(categoryDiv);
+                });
+
+                // Add event listeners for checklist
+                checklistContainer.addEventListener('change', (e) => {
+                    if (e.target.type === 'checkbox') {
+                        const id = e.target.dataset.id;
+                        const item = checklistItems.find(i => i.id === id);
+                        item.isChecked = e.target.checked;
+                        updateSummary();
+                    }
+                });
+
+                // Add event listeners for collapsible buttons
+                checklistContainer.addEventListener('click', (e) => {
+                    const btn = e.target.closest('.collapsible-btn');
+                    if (btn) {
+                        const parentLi = btn.closest('.collapsible-item');
+                        parentLi.classList.toggle('open');
+                    }
+                });
+
+                // Update summary on initial load if any items are checked
+                updateSummary();
+            };
+
+            const updateSummary = () => {
+                const checkedItems = checklistItems.filter(item => item.isChecked);
+                const summaryArea = document.getElementById('summary-area');
+                if (summaryArea) {
+                    if (checkedItems.length > 0) {
+                        generateSummary(checkedItems);
+                    } else {
+                        summaryArea.innerHTML = `<p class="text-gray-500 italic">Check some items to generate a summary of your module's strengths.</p>`;
+                    }
+                }
+            };
+
+            const generateSummary = async (checkedItems) => {
+                const summaryArea = document.getElementById('summary-area');
+                if (!summaryArea) return;
+                summaryArea.innerHTML = `<p class="text-gray-500 italic">Generating your summary...</p>`;
+
+                let prompt = `Given the following items from an educational module checklist have been completed: ${checkedItems.map(item => item.text).join(', ')}. Please write a concise, friendly summary of the module's strengths and suggest one area for improvement, based on the checked items.`;
+                
+                const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                let response;
+                let retries = 0;
+                const maxRetries = 5;
+                const initialDelay = 1000;
+
+                while (retries < maxRetries) {
+                    try {
+                        response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                            if (text) {
+                                summaryArea.innerHTML = `<p>${text}</p>`;
+                            } else {
+                                summaryArea.innerHTML = `<p class="text-red-500">Sorry, I couldn't generate a summary. Please try again.</p>`;
+                            }
+                            break;
+                        } else if (response.status === 429) {
+                            const delay = initialDelay * Math.pow(2, retries);
+                            retries++;
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                        } else {
+                            summaryArea.innerHTML = `<p class="text-red-500">Sorry, an error occurred while generating the summary. Please try again.</p>`;
+                            break;
+                        }
+                    } catch (error) {
+                        summaryArea.innerHTML = `<p class="text-red-500">Sorry, I couldn't connect to the server to generate a summary.</p>`;
+                        break;
+                    }
+                }
+            };
+            
+            const navigateTo = (pageId) => {
+                currentPage = pageId;
+                mainContent.innerHTML = units[currentPage] || units['Unit-1'];
+
+                // If on the checklist page, render the checklist
+                if (currentPage === 'Unit-6') {
+                    renderChecklist();
+                }
+
+                // Close sidebar on mobile
+                if (window.innerWidth < 1024) {
+                    toggleSidebar();
+                }
+
+                // Update active state of nav buttons
+                document.querySelectorAll('#nav-list button').forEach(btn => {
+                    btn.classList.remove('bg-indigo-100', 'text-indigo-700', 'font-semibold', 'shadow-md');
+                    btn.classList.add('text-gray-600', 'hover:bg-gray-100');
+                    if (btn.dataset.page === currentPage) {
+                        btn.classList.add('bg-indigo-100', 'text-indigo-700', 'font-semibold', 'shadow-md');
+                        btn.classList.remove('text-gray-600', 'hover:bg-gray-100');
+                    }
+                });
+            };
+
+            // Initial rendering
+            navigateTo('Unit-1');
+        });
+    </script>
+</body>
+</html>
