@@ -13,12 +13,14 @@
             font-family: 'Inter', sans-serif;
             background-color: #f0f4f8;
         }
-        
+
+        /* Responsive sidebar styling */
         #sidebar {
             width: 100%;
             transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
         }
-        
+
         #sidebar.open {
             transform: translateX(0);
         }
@@ -28,39 +30,26 @@
                 width: 25%;
                 transform: translateX(0);
             }
-            #sidebar.closed {
-                transform: translateX(-100%);
-            }
             #main-content {
                 margin-left: 25%;
             }
-            #main-content.sidebar-closed {
-                margin-left: 0;
-            }
         }
 
-        .prose {
-            color: #4a5568;
-            line-height: 1.6;
-        }
-
-        .prose p {
-            margin-bottom: 1rem;
-        }
-
-        .prose strong {
-            font-weight: 700;
-        }
-
-        .collapsible-item .collapsible-content {
-            max-height: 0;
-            transition: max-height 0.3s ease-out;
+        /* Collapsible content styling for smooth animation */
+        .collapsible-content {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.3s ease-in-out;
         }
 
         .collapsible-item.open .collapsible-content {
-            max-height: 500px; /* Adjust as needed for content length */
-            transition: max-height 0.3s ease-in;
+            grid-template-rows: 1fr;
         }
+
+        .collapsible-item .collapsible-content .content {
+            overflow: hidden;
+        }
+
         .collapsible-item.open .collapsible-btn .chevron-icon {
             transform: rotate(90deg);
         }
@@ -68,33 +57,34 @@
 </head>
 <body class="bg-blue-50">
     <!-- Main container -->
-    <div class="flex flex-col lg:flex-row min-h-screen bg-blue-50 transition-all duration-300">
+    <div class="flex flex-col min-h-screen bg-blue-50">
 
         <!-- Sidebar Navigation -->
-        <nav id="sidebar" class="fixed top-0 left-0 h-full bg-white shadow-xl flex-shrink-0 transition-all duration-300 transform -translate-x-full w-full lg:w-1/4 overflow-y-auto z-40 p-6 lg:p-8">
+        <nav id="sidebar" class="fixed top-0 left-0 h-full bg-white shadow-xl flex-shrink-0 z-40 overflow-y-auto p-6 lg:p-8 lg:w-1/4">
             <div class="flex justify-between items-center mb-6 border-b-2 pb-4">
                 <h2 class="text-2xl font-bold text-indigo-700">Module Units</h2>
                 <!-- Close button for mobile -->
-                <button id="close-sidebar-btn" class="text-gray-500 lg:hidden p-2 rounded-full hover:bg-gray-100 transition-colors">
+                <button id="close-sidebar-btn" class="lg:hidden p-2 rounded-full text-gray-500 hover:bg-gray-100 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
-            <ul class="space-y-4" id="nav-list">
+            <ul class="space-y-2" id="nav-list">
                 <!-- Navigation items will be injected here -->
             </ul>
         </nav>
 
         <!-- Main Content Area -->
-        <main id="main-content" class="flex-grow p-6 lg:p-8 transition-all duration-300 lg:ml-[25%]">
+        <main id="main-content" class="flex-grow p-6 lg:p-8 transition-all duration-300">
             <div class="container mx-auto">
                 <header class="flex items-center justify-between mb-6">
-                    <h1 class="text-5xl font-extrabold text-gray-900 border-b-4 pb-4 flex-grow">Creating Interactive Modules with Genially</h1>
-                    <button id="toggle-sidebar-btn" class="p-3 bg-white text-indigo-700 rounded-full shadow-lg ml-4">
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 border-b-4 pb-4 flex-grow">Creating Interactive Modules with Genially</h1>
+                    <!-- Menu button for mobile -->
+                    <button id="toggle-sidebar-btn" class="p-3 bg-white text-indigo-700 rounded-full shadow-lg ml-4 lg:hidden">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
                     </button>
                 </header>
 
-                <p class="text-xl text-gray-600 mb-8">This module provides a comprehensive guide to designing and developing engaging interactive content for pupils using Genially, grounded in educational theory and best practices. 🚀</p>
+                <p class="text-base sm:text-xl text-gray-600 mb-8">This module provides a comprehensive guide to designing and developing engaging interactive content for pupils using Genially, grounded in educational theory and best practices. 🚀</p>
 
                 <div id="content-area">
                     <!-- Unit content will be injected here -->
@@ -143,7 +133,6 @@
             const navList = document.getElementById('nav-list');
             const mainContent = document.getElementById('content-area');
             const sidebar = document.getElementById('sidebar');
-            const mainContentWrapper = document.getElementById('main-content');
             const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
             const closeSidebarBtn = document.getElementById('close-sidebar-btn');
             let currentPage = 'Unit-1';
@@ -151,7 +140,7 @@
             // Generate navigation items
             navItems.forEach(item => {
                 const li = createEl('li');
-                const button = createEl('button', ['flex', 'items-center', 'text-left', 'w-full', 'p-4', 'rounded-xl', 'transition-all', 'duration-200', 'text-gray-600', 'hover:bg-gray-100'], `<span class="w-5 h-5 mr-3">${icons[item.icon]}</span><span class="text-lg">${item.title}</span>`);
+                const button = createEl('button', ['flex', 'items-center', 'text-left', 'w-full', 'p-4', 'rounded-xl', 'transition-all', 'duration-200', 'text-gray-600', 'hover:bg-gray-100', 'hover:text-indigo-700'], `<span class="w-5 h-5 mr-3">${icons[item.icon]}</span><span class="text-lg">${item.title}</span>`);
                 button.dataset.page = item.id;
                 li.appendChild(button);
                 navList.appendChild(li);
@@ -168,7 +157,7 @@
             // Menu toggle
             const toggleSidebar = () => {
                 sidebar.classList.toggle('open');
-                mainContentWrapper.classList.toggle('sidebar-closed');
+                // The main content margin is now handled by CSS media queries
             };
 
             toggleSidebarBtn.addEventListener('click', toggleSidebar);
@@ -182,12 +171,12 @@
             const units = {
                 'Unit-1': `
                     <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                        <h2 class="flex items-center text-xl sm:text-2xl md:text-3xl font-extrabold text-indigo-700 mb-4">
                             <span class="w-8 h-8 mr-3 text-indigo-500">${icons.Rocket}</span>
                             1.1 Why Create Interactive Modules?
                         </h2>
-                        <p class="text-gray-700">The landscape of learning has dramatically shifted. Today's children, often referred to as "digital natives," are growing up in an environment saturated with digital information and interactive media. Traditional, passive learning models often fail to capture their attention or foster the deeper cognitive processing required for meaningful learning. Interactive modules are designed to bridge this gap, offering several key advantages:</p>
-                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                        <p class="text-gray-700 prose">The landscape of learning has dramatically shifted. Today's children, often referred to as "digital natives," are growing up in an environment saturated with digital information and interactive media. Traditional, passive learning models often fail to capture their attention or foster the deeper cognitive processing required for meaningful learning. Interactive modules are designed to bridge this gap, offering several key advantages:</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2 prose">
                             <li><strong>The Digital Native Generation:</strong> Interactive modules meet students where they are, leveraging their innate digital fluency for educational purposes. By using tools and formats they are familiar with, we can reduce the learning curve and increase engagement from the outset.</li>
                             <li><strong>Attention Spans and Engagement:</strong> With a constant stream of information, maintaining a child's attention is a challenge. Interactive modules combat this by providing varied stimuli, opportunities for active participation, and immediate feedback, which all serve to keep the learner focused and engaged.</li>
                         </ul>
@@ -197,12 +186,12 @@
                         </div>
                     </div>
                     <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                        <h2 class="flex items-center text-xl sm:text-2xl md:text-3xl font-extrabold text-indigo-700 mb-4">
                             <span class="w-8 h-8 mr-3 text-yellow-500">${icons.Lightbulb}</span>
                             1.2 Theories and Research Supporting Interactive Learning
                         </h2>
-                        <p class="text-gray-700">The efficacy of interactive learning is deeply rooted in established educational theories and validated by extensive empirical research. Understanding these theories can help you design more effective and pedagogically sound modules.</p>
-                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                        <p class="text-gray-700 prose">The efficacy of interactive learning is deeply rooted in established educational theories and validated by extensive empirical research. Understanding these theories can help you design more effective and pedagogically sound modules.</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2 prose">
                             <li><strong>Constructivism (Piaget, Vygotsky):</strong> This theory posits that learners actively construct their own understanding and knowledge of the world through experience and reflection. Interactive modules provide the "experiences" and "modifications" necessary for this active construction, encouraging students to make connections and build on prior knowledge.</li>
                             <li><strong>Cognitive Load Theory (Sweller):</strong> This theory suggests that our working memory has a limited capacity. Well-designed interactive modules can reduce extraneous cognitive load by presenting information clearly and logically, while focusing on a single task at a time.</li>
                             <li><strong>Social Learning Theory (Bandura):</strong> This theory emphasizes the importance of observing and modeling the behaviors, attitudes, and emotional reactions of others. Interactive modules can incorporate opportunities for collaboration and peer sharing, allowing students to learn from each other in a guided environment.</li>
@@ -211,27 +200,27 @@
                 `,
                 'Unit-2': `
                     <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                        <h2 class="flex items-center text-xl sm:text-2xl md:text-3xl font-extrabold text-indigo-700 mb-4">
                             <span class="w-8 h-8 mr-3 text-blue-500">${icons.Book}</span>
                             2.1 Overview of the Genially Platform
                         </h2>
-                        <p class="text-gray-700">Genially is a versatile online content creation tool designed to bring static content to life. It’s a powerful platform for educators, allowing you to create presentations, infographics, gamified content, interactive images, and more—all without needing to write a single line of code. Its strength lies in its intuitive drag-and-drop interface and a rich library of pre-designed templates and interactive elements.</p>
+                        <p class="text-gray-700 prose">Genially is a versatile online content creation tool designed to bring static content to life. It’s a powerful platform for educators, allowing you to create presentations, infographics, gamified content, interactive images, and more—all without needing to write a single line of code. Its strength lies in its intuitive drag-and-drop interface and a rich library of pre-designed templates and interactive elements.</p>
                         <div class="mt-6 flex flex-wrap justify-center items-center gap-4">
                             <img src="https://placehold.co/400x200/5C6BC0/FFFFFF?text=Infographic:%20Genially%20Platform%20Features" alt="An infographic detailing the features of the Genially platform." class="rounded-xl shadow-md" />
                         </div>
-                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2 prose">
                             <li><strong>What is Genially:</strong> It's a cloud-based tool that makes it easy to add layers of interactivity to any visual asset. This can range from simple hover effects to complex branching scenarios.</li>
                             <li><strong>The Dashboard:</strong> Your control center for managing all your creations. From here, you can start a new project from scratch, use a template, organize existing "geniallys," and share your work.</li>
                             <li><strong>Templates:</strong> Genially provides thousands of professionally designed templates tailored for specific educational purposes, saving you significant time and effort.</li>
                         </ul>
                     </div>
                     <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                        <h2 class="flex items-center text-xl sm:text-2xl md:text-3xl font-extrabold text-indigo-700 mb-4">
                             <span class="w-8 h-8 mr-3 text-purple-500">${icons.Palette}</span>
                             2.2 The Genially Editor Interface
                         </h2>
-                        <p class="text-gray-700">The Genially editor is a user-friendly environment where all the magic happens. Navigating its key panels is essential for efficient creation:</p>
-                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                        <p class="text-gray-700 prose">The Genially editor is a user-friendly environment where all the magic happens. Navigating its key panels is essential for efficient creation:</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2 prose">
                             <li><strong>Elements Panel:</strong> This is your primary toolbox on the left side. It contains all the building blocks for your module, including text, images, resources, and interactive buttons.</li>
                             <li><strong>Pages Panel:</strong> Manages the different "slides" or pages of your project. You can add, delete, duplicate, and reorder pages here to control the flow of your module.</li>
                             <li><strong>Layers Panel:</strong> Critical for managing complex designs. It allows you to see and control the stacking order of elements. You can move objects to the front or back, lock them in place, or hide them temporarily.</li>
@@ -244,12 +233,12 @@
                 `,
                 'Unit-3': `
                     <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                        <h2 class="flex items-center text-xl sm:text-2xl md:text-3xl font-extrabold text-indigo-700 mb-4">
                             <span class="w-8 h-8 mr-3 text-pink-500">${icons.Type}</span>
                             3.1 Working with Text and Typography
                         </h2>
-                        <p class="text-gray-700">The way you present text can make or break your module. Effective typography is about more than just choosing a font; it's about clarity and legibility. For young learners, simple, sans-serif fonts are generally the best choice as they are easy to read. Be mindful of font sizes and ensure there is sufficient contrast between your text and the background color to prevent eye strain. 🎨</p>
-                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                        <p class="text-gray-700 prose">The way you present text can make or break your module. Effective typography is about more than just choosing a font; it's about clarity and legibility. For young learners, simple, sans-serif fonts are generally the best choice as they are easy to read. Be mindful of font sizes and ensure there is sufficient contrast between your text and the background color to prevent eye strain. 🎨</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2 prose">
                             <li><strong>Font Choices:</strong> Stick to simple, legible fonts like Arial, Helvetica, or Genially’s built-in options. Avoid overly decorative or scripted fonts that can be difficult for children to read.</li>
                             <li><strong>Hierarchy:</strong> Use different font sizes, weights (bold), and colors to create a clear visual hierarchy. Headings should be prominent, while body text should be comfortable to read.</li>
                         </ul>
@@ -258,23 +247,23 @@
                         </div>
                     </div>
                     <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                        <h2 class="flex items-center text-xl sm:text-2xl md:text-3xl font-extrabold text-indigo-700 mb-4">
                             <span class="w-8 h-8 mr-3 text-red-500">${icons.Eye}</span>
                             3.2 Integrating Visuals and Multimedia
                         </h2>
-                        <p class="text-gray-700">Visuals and multimedia are crucial for engaging today's learners and catering to diverse learning styles. Genially makes it easy to incorporate a variety of media types. 🖼️🎥</p>
-                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                        <p class="text-gray-700 prose">Visuals and multimedia are crucial for engaging today's learners and catering to diverse learning styles. Genially makes it easy to incorporate a variety of media types. 🖼️🎥</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2 prose">
                             <li><strong>Images and Illustrations:</strong> Use high-quality images from Genially's integrated libraries or upload your own. Illustrations, icons, and infographics can simplify complex ideas and make the content more visually appealing.</li>
                             <li><strong>Multimedia:</strong> You can easily embed videos from platforms like YouTube or Vimeo by simply pasting the URL. Adding audio elements, such as a short narration or sound effects, can be a great way to enhance the learning experience, especially for younger pupils.</li>
                         </ul>
                     </div>
                     <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                        <h2 class="flex items-center text-xl sm:text-2xl md:text-3xl font-extrabold text-indigo-700 mb-4">
                             <span class="w-8 h-8 mr-3 text-teal-500">${icons.Link}</span>
                             3.3 Core Interactive Elements
                         </h2>
-                        <p class="text-gray-700">Genially's core strength is its interactive features. Every interactive element can be assigned an "action" that triggers when a user clicks or hovers over it. These actions are the building blocks of an engaging module: 👇</p>
-                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                        <p class="text-gray-700 prose">Genially's core strength is its interactive features. Every interactive element can be assigned an "action" that triggers when a user clicks or hovers over it. These actions are the building blocks of an engaging module: 👇</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2 prose">
                             <li><strong>Tooltip:</strong> A small pop-up that appears on hover, ideal for providing quick, concise information without cluttering the screen.</li>
                             <li><strong>Window:</strong> A larger pop-up that appears on click. This is perfect for detailed content, such as a full text explanation, a video, or an image gallery.</li>
                             <li><strong>Go to Page:</strong> This action allows you to create a non-linear learning path, directing the user to a different page in your Genially module.</li>
@@ -285,12 +274,12 @@
                         </div>
                     </div>
                     <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                        <h2 class="flex items-center text-xl sm:text-2xl md:text-3xl font-extrabold text-indigo-700 mb-4">
                             <span class="w-8 h-8 mr-3 text-indigo-500">${icons.Rocket}</span>
                             3.4 Animation and Advanced Interactivity
                         </h2>
-                        <p class="text-gray-700">Animations add dynamism, while advanced interactivity creates more sophisticated and engaging experiences. ✨</p>
-                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                        <p class="text-gray-700 prose">Animations add dynamism, while advanced interactivity creates more sophisticated and engaging experiences. ✨</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2 prose">
                             <li><strong>Animations:</strong> Use purposeful animations to highlight new information, guide the learner's eye, or provide a sense of progress.</li>
                             <li><strong>Drag-and-Drop:</strong> A powerful premium feature for creating sorting activities, matching games, and classification exercises.</li>
                             <li><strong>Question Blocks:</strong> Genially provides pre-built question and answer blocks that can be customized for self-assessment.</li>
@@ -299,12 +288,12 @@
                 `,
                 'Unit-4': `
                     <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                        <h2 class="flex items-center text-xl sm:text-2xl md:text-3xl font-extrabold text-indigo-700 mb-4">
                             <span class="w-8 h-8 mr-3 text-orange-500">${icons.Settings}</span>
                             4.1 Types of Interactive Content for Children
                         </h2>
-                        <p class="text-gray-700">Interactive content can take many forms, each suited for a different pedagogical purpose. 🧠</p>
-                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                        <p class="text-gray-700 prose">Interactive content can take many forms, each suited for a different pedagogical purpose. 🧠</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2 prose">
                             <li><strong>Interactive Storybooks:</strong> By adding interactive elements like pop-up facts or mini-games within a narrative, you can create immersive and engaging stories that help with reading comprehension and vocabulary.</li>
                             <li><strong>Gamified Quizzes and Escapes:</strong> Turn a traditional quiz into a fun game with a scoring system or badges. "Escape Room" style modules require students to solve a series of puzzles.</li>
                             <li><strong>Virtual Field Trips:</strong> Create an interactive journey through a museum, a historical site, or even a virtual tour of the human body.</li>
@@ -315,12 +304,12 @@
                         </div>
                     </div>
                     <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                        <h2 class="flex items-center text-xl sm:text-2xl md:text-3xl font-extrabold text-indigo-700 mb-4">
                             <span class="w-8 h-8 mr-3 text-purple-500">${icons.Palette}</span>
                             4.2 Child-Friendly Design Principles
                         </h2>
-                        <p class="text-gray-700">Effective design for children requires specific considerations to ensure the content is not only engaging but also accessible and easy to use. 👩‍🏫</p>
-                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                        <p class="text-gray-700 prose">Effective design for children requires specific considerations to ensure the content is not only engaging but also accessible and easy to use. 👩‍🏫</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2 prose">
                             <li><strong>Simplicity and Clarity:</strong> Avoid clutter and visual noise. Use a clean layout with ample white space. Use clear, age-appropriate language and simple instructions.</li>
                             <li><strong>Visual Appeal:</strong> Children are drawn to bright, vibrant colors and engaging illustrations. Use a consistent color palette and a style of illustration that aligns with the module's topic.</li>
                             <li><strong>Intuitive Navigation:</strong> Make sure the interactive elements are clearly labeled and easy to find. Use universal icons for things like 'Next,' 'Back,' and 'Home.'</li>
@@ -331,12 +320,12 @@
                         </div>
                     </div>
                     <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                        <h2 class="flex items-center text-xl sm:text-2xl md:text-3xl font-extrabold text-indigo-700 mb-4">
                             <span class="w-8 h-8 mr-3 text-pink-500">${icons.Target}</span>
                             4.3 Structuring a Learning Pathway
                         </h2>
-                        <p class="text-gray-700">A well-structured module guides the learner logically through the content, from introduction to conclusion. A solid pathway ensures that students build their knowledge progressively. 🗺️</p>
-                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                        <p class="text-gray-700 prose">A well-structured module guides the learner logically through the content, from introduction to conclusion. A solid pathway ensures that students build their knowledge progressively. 🗺️</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2 prose">
                             <li><strong>Introduction:</strong> Begin with a short, engaging hook that introduces the topic and outlines the learning objectives. This primes the learner for what's to come.</li>
                             <li><strong>Content Chunks:</strong> Break down complex information into smaller, digestible chunks. Use a new page or a pop-up window for each concept to prevent cognitive overload.</li>
                             <li><strong>Practice and Application:</strong> Integrate interactive activities, such as quizzes or drag-and-drop exercises, immediately after a content chunk.</li>
@@ -346,54 +335,54 @@
                 `,
                 'Unit-5': `
                     <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                        <h2 class="flex items-center text-xl sm:text-2xl md:text-3xl font-extrabold text-indigo-700 mb-4">
                             <span class="w-8 h-8 mr-3 text-blue-500">${icons.Eye}</span>
                             5.1 Previewing and Testing Your Genially
                         </h2>
-                        <p class="text-gray-700">Rigorous testing is paramount before publishing. Genially provides a "Preview" button in the editor that allows you to see your work as a user would. During this phase, make sure to: 🐞</p>
-                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                        <p class="text-gray-700 prose">Rigorous testing is paramount before publishing. Genially provides a "Preview" button in the editor that allows you to see your work as a user would. During this phase, make sure to: 🐞</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2 prose">
                             <li><strong>Functionality Check:</strong> Click on every interactive element to ensure it behaves as expected.</li>
                             <li><strong>Responsiveness Test:</strong> Check your module on different devices (desktop, tablet, mobile) to ensure the layout remains functional and visually appealing.</li>
                             <li><strong>User Walkthrough:</strong> Ask a colleague or a student to navigate the module from start to finish. Their feedback is invaluable for catching usability issues you might have missed.</li>
                         </ul>
                     </div>
                     <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                        <h2 class="flex items-center text-xl sm:text-2xl md:text-3xl font-extrabold text-indigo-700 mb-4">
                             <span class="w-8 h-8 mr-3 text-teal-500">${icons.Link}</span>
                             5.2 Publishing and Sharing Your Module
                         </h2>
-                        <p class="text-gray-700">Once your module is ready, Genially offers flexible options for sharing your creations. From the editor, you can click the "All set" button to begin the publishing process. 🌐</p>
-                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                        <p class="text-gray-700 prose">Once your module is ready, Genially offers flexible options for sharing your creations. From the editor, you can click the "All set" button to begin the publishing process. 🌐</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2 prose">
                             <li><strong>Public vs. Private:</strong> You can choose to make your Genially public, where it will be visible on your profile and discoverable via search engines, or private, which is only accessible to those with the link (a premium feature).</li>
                             <li><strong>Sharing via Link:</strong> The simplest method for distribution. You can copy a link and share it directly with students via email, a learning management system (LMS), or a classroom website.</li>
                             <li><strong>Embedding:</strong> Genially provides an embed code that allows you to integrate your module directly into a website or blog, making it a seamless part of your existing content.</li>
                         </ul>
                     </div>
                     <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                        <h2 class="flex items-center text-xl sm:text-2xl md:text-3xl font-extrabold text-indigo-700 mb-4">
                             <span class="w-8 h-8 mr-3 text-green-500">${icons.CheckSquare}</span>
                             5.3 Gathering Feedback and Iteration
                         </h2>
-                        <p class="text-gray-700">The process of creating effective educational modules is iterative. Your first version is a prototype, and feedback from pupils and peers is invaluable for continuous improvement. After publishing your Genially module, consider a feedback plan that includes: 📝</p>
-                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2">
+                        <p class="text-gray-700 prose">The process of creating effective educational modules is iterative. Your first version is a prototype, and feedback from pupils and peers is invaluable for continuous improvement. After publishing your Genially module, consider a feedback plan that includes: 📝</p>
+                        <ul class="list-disc list-inside mt-4 text-gray-700 space-y-2 prose">
                             <li><strong>Direct Observation:</strong> Watch a student as they interact with your module. Where do they get stuck? Where do they seem most engaged?</li>
                             <li><strong>Quick Surveys:</strong> Use a simple, short survey at the end of the module to ask about clarity, difficulty, and enjoyment.</li>
                             <li><strong>Peer Review:</strong> Ask a colleague to review your module, focusing on pedagogical design and technical functionality.</li>
                         </ul>
-                        <p class="mt-4 text-gray-700">Based on this feedback, you can iterate and improve your module for a more effective learning experience. It is a cycle of design, implement, evaluate, and refine.</p>
+                        <p class="mt-4 text-gray-700 prose">Based on this feedback, you can iterate and improve your module for a more effective learning experience. It is a cycle of design, implement, evaluate, and refine.</p>
                     </div>
                 `,
                 'Unit-6': `
                     <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-                        <h2 class="flex items-center text-4xl font-extrabold text-indigo-700 mb-4">
+                        <h2 class="flex items-center text-xl sm:text-2xl md:text-3xl font-extrabold text-indigo-700 mb-4">
                             <span class="w-8 h-8 mr-3 text-green-500">${icons.CheckSquare}</span>
                             Final Module Checklist
                         </h2>
-                        <p class="text-gray-700">Use this comprehensive checklist to evaluate your module before publishing. Check each item as you confirm it to see a live-generated summary of your progress. ✅</p>
+                        <p class="text-gray-700 prose">Use this comprehensive checklist to evaluate your module before publishing. Check each item as you confirm it to see a live-generated summary of your progress. ✅</p>
                     </div>
                     <div id="checklist-container"></div>
                     <div class="bg-indigo-50 p-6 rounded-2xl shadow-lg mt-8">
-                        <h3 class="text-2xl font-bold text-indigo-800 mb-4">Module Summary</h3>
+                        <h3 class="text-xl sm:text-2xl font-bold text-indigo-800 mb-4">Module Summary</h3>
                         <div id="summary-area" class="prose text-gray-700 leading-relaxed">
                             <p class="text-gray-500 italic">Check some items to generate a summary of your module's strengths.</p>
                         </div>
@@ -442,7 +431,7 @@
 
                 Object.keys(categorizedItems).forEach(category => {
                     const categoryDiv = createEl('div', ['bg-white', 'p-6', 'rounded-2xl', 'shadow-lg', 'mb-8']);
-                    const title = createEl('h3', ['text-2xl', 'font-bold', 'text-gray-800', 'mb-4', 'border-b', 'pb-2'], category);
+                    const title = createEl('h3', ['text-xl', 'sm:text-2xl', 'font-bold', 'text-gray-800', 'mb-4', 'border-b', 'pb-2'], category);
                     const list = createEl('ul', ['list-none', 'space-y-4']);
 
                     categorizedItems[category].forEach(item => {
@@ -454,8 +443,8 @@
                                     <label class="text-lg cursor-pointer flex-grow font-medium text-gray-800">
                                         ${item.text}
                                     </label>
-                                    <div class="collapsible-content my-2 border border-gray-200 rounded-xl overflow-hidden">
-                                        <button class="collapsible-btn w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+                                    <div class="collapsible-content">
+                                        <button class="collapsible-btn w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-200 rounded-b-xl">
                                             <span class="font-medium text-indigo-600">Academic Justification</span>
                                             <span class="w-5 h-5 transition-transform duration-200 chevron-icon">${icons.ChevronRight}</span>
                                         </button>
@@ -517,7 +506,7 @@
                 summaryArea.innerHTML = `<p class="text-gray-500 italic">Generating your summary...</p>`;
 
                 let prompt = `Given the following items from an educational module checklist have been completed: ${checkedItems.map(item => item.text).join(', ')}. Please write a concise, friendly summary of the module's strengths and suggest one area for improvement, based on the checked items.`;
-                
+
                 const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
                 const payload = { contents: chatHistory };
                 const apiKey = "";
@@ -559,7 +548,7 @@
                     }
                 }
             };
-            
+
             const navigateTo = (pageId) => {
                 currentPage = pageId;
                 mainContent.innerHTML = units[currentPage] || units['Unit-1'];
